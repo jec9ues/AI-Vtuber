@@ -1,3 +1,5 @@
+import asyncio
+
 import pytchat
 import openai
 import json
@@ -100,27 +102,6 @@ def EL_TTS(message):
     play(audio_content)
 
 
-def read_chat():
-
-    chat = pytchat.create(video_id=video_id)
-    schat = pytchat.create(video_id=video_id, processor = SpeedCalculator(capacity = 20))
-
-    while chat.is_alive():
-        for c in chat.get().sync_items():
-            print(f"\n{c.datetime} [{c.author.name}]- {c.message}\n")
-            message = c.message
-
-            response = llm(message)
-            print(response)
-            Controller_TTS(response)
-
-            if schat.get() >= 20:
-                chat.terminate()
-                schat.terminate()
-                return
-
-
-            time.sleep(1)
 
 
 def llm(message):
@@ -141,11 +122,39 @@ def llm(message):
     return(json_object['choices'][0]['text'])
 
 
+from twitchio.ext import commands
+
+
+class Bot(commands.Bot):
+
+    def __init__(self):
+        # Initialise our Bot with our access token, prefix and a list of channels to join on boot...
+        # prefix can be a callable, which returns a list of strings or a string...
+        # initial_channels can also be a callable which returns a list of strings...
+        super().__init__(token='ACCESS_TOKEN', prefix='?', initial_channels=['...'])
+
+    async def event_message(self, message):
+        # Messages with echo set to True are messages sent by the bot...
+        # For now we just want to ignore them...
+        if message.echo:
+            return
+
+        print(f"\n{message.timestamp} [{message.author.name}]- {message.content}\n")
+        cotnent = message.content
+
+
+        response = llm(cotnent)
+        print(response)
+        Controller_TTS(response)
+        await asyncio.sleep(2)
+        # Since we have commands and are overriding the default `event_message`
+        # We must let the bot know we want to handle and invoke our commands...
+
+
+
+
+
 if __name__ == "__main__":
     initVar()
-    print("\n\Running!\n\n")
-
-    while True:
-        read_chat()
-        print("\n\nReset!\n\n")
-        time.sleep(2)
+    bot = Bot()
+    bot.run()
