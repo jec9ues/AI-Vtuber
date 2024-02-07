@@ -27,7 +27,6 @@ def initVar():
     global EL_key
     global OAI_key
     global EL_voice
-    global video_id
     global tts_type
     global OAI
     global EL
@@ -56,7 +55,6 @@ def initVar():
     tts_list = ["pyttsx3", "EL"]
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-id", "--video_id", type=str)
     parser.add_argument("-tts", "--tts_type", default="pyttsx3", choices=tts_list, type=str)
 
     args = parser.parse_args()
